@@ -89,5 +89,5 @@ export type InvoiceForm = {
 
 export type RevenueRaw = {
   month: number;
-  revenue: string;
+  revenue: number;
 };

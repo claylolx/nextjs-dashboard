@@ -8,6 +8,7 @@ import {
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
+// Revenue Chart
 export async function fetchRevenue(): Promise<Revenue[]> {
   const data = await sql<RevenueRaw[]>`
     SELECT
@@ -26,20 +27,25 @@ export async function fetchRevenue(): Promise<Revenue[]> {
   }));
 }
 
+// Últimas facturas (5)
 export async function fetchLatestInvoices(): Promise<LatestInvoice[]> {
   const data = await sql<LatestInvoiceRaw[]>`
-    SELECT invoices.amount, customers.name, customers.image_url, customers.email
+    SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
     FROM invoices
     JOIN customers ON invoices.customer_id = customers.id
     ORDER BY invoices.date DESC
     LIMIT 5`;
 
   return data.map((invoice) => ({
-    ...invoice,
-    amount: Number(invoice.amount),
+    id: invoice.id,
+    name: invoice.name,
+    email: invoice.email,
+    image_url: invoice.image_url,
+    amount: invoice.amount, // tipo number, tal como espera `LatestInvoice`
   }));
 }
 
+// Métricas generales (tarjetas)
 export async function fetchCardData() {
   const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
   const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
